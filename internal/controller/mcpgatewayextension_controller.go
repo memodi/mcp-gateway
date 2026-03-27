@@ -109,6 +109,7 @@ type MCPGatewayExtensionReconciler struct {
 	ConfigWriterDeleter   ConfigWriterDeleter
 	MCPExtFinderValidator MCPGatewayExtensionFinderValidator
 	BrokerRouterImage     string
+	ConsolePluginImage    string
 }
 
 // +kubebuilder:rbac:groups=mcp.kuadrant.io,resources=mcpgatewayextensions,verbs=get;list;watch;update
@@ -119,11 +120,13 @@ type MCPGatewayExtensionReconciler struct {
 // +kubebuilder:rbac:groups=gateway.networking.k8s.io,resources=referencegrants,verbs=list;watch
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;create;delete
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=gateway.networking.k8s.io,resources=httproutes,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=console.openshift.io,resources=consoleplugins,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile reconciles an MCPGatewayExtension resource. Deploying and configuring a MCP Gateway instance configured to integrate and provide MCP functionality with the targeted gateway
 func (r *MCPGatewayExtensionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -240,6 +243,12 @@ func (r *MCPGatewayExtensionReconciler) reconcileActive(ctx context.Context, mcp
 		}
 		// requeue to check deployment status again since Owns watch doesn't trigger on status-only changes
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	// reconcile console plugin resources (singleton pattern - shared across MCPGatewayExtensions)
+	if err := r.reconcileConsolePlugin(ctx, mcpExt, targetGateway, listenerConfig); err != nil {
+		r.log.Error("failed to reconcile console plugin", "error", err)
+		// don't fail the reconciliation - console plugin is optional
 	}
 
 	if err := r.reconcileEnvoyFilter(ctx, mcpExt, targetGateway, listenerConfig); err != nil {

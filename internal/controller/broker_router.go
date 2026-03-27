@@ -197,7 +197,8 @@ func (r *MCPGatewayExtensionReconciler) buildBrokerRouterService(mcpExt *mcpv1al
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
-				labelAppName: brokerRouterName,
+				labelAppName:      brokerRouterName,
+				labelManagedBy:    labelManagedByValue,
 			},
 			Ports: []corev1.ServicePort{
 				{

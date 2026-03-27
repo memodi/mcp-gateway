@@ -74,6 +74,7 @@ func (m *MockMCP) ListTools(_ context.Context, _ mcp.ListToolsRequest) (*mcp.Lis
 	return &mcp.ListToolsResult{Tools: m.tools}, nil
 }
 
+
 func (m *MockMCP) OnNotification(_ func(notification mcp.JSONRPCNotification)) {}
 
 func (m *MockMCP) OnConnectionLost(_ func(err error)) {}
@@ -403,8 +404,13 @@ func TestMCPManager_toolToServerTool(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, string(mock.id), id)
 
-	// handler should return error result
-	result, err := serverTool.Handler(context.Background(), mcp.CallToolRequest{})
+	// handler should return error (broker doesn't forward tool calls)
+	req := mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Name: "prefix_mytool",
+		},
+	}
+	result, err := serverTool.Handler(context.Background(), req)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.True(t, result.IsError)

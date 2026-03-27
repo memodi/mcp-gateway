@@ -755,3 +755,42 @@ coverage: testwithcoverage
 .PHONY: htmlcov
 htmlcov: coverage
 	go tool cover -html=coverage.out
+
+# Deploy with console plugin
+.PHONY: deploy-with-console-plugin
+deploy-with-console-plugin: install-crd deploy-namespaces ## Deploy controller with OpenShift Console Plugin
+	kubectl apply -k config/mcp-gateway/overlays/with-console-plugin/
+	@echo "Waiting for controller to be ready..."
+	@kubectl wait --for=condition=Available deployment/mcp-controller -n mcp-system --timeout=$(WAIT_TIME)
+	@echo "Waiting for MCPGatewayExtension to be ready..."
+	@kubectl wait --for=condition=Ready mcpgatewayextension/mcp-gateway-extension -n mcp-system --timeout=$(WAIT_TIME)
+	@echo "Waiting for console plugin to be ready..."
+	@kubectl wait --for=condition=Available deployment/mcp-gateway-console-plugin -n mcp-system --timeout=$(WAIT_TIME)
+	@echo "Controller, broker-router, and console plugin are ready"
+	@echo ""
+	@echo "To enable the console plugin in OpenShift Console, run:"
+	@echo "  make enable-console-plugin"
+
+.PHONY: enable-console-plugin
+enable-console-plugin: ## Enable the MCP Gateway Console Plugin in OpenShift Console
+	@echo "Enabling mcp-gateway-console-plugin in OpenShift Console..."
+	@kubectl patch console.operator.openshift.io cluster \
+	  --type='json' \
+	  -p='[{"op": "test", "path": "/spec/plugins", "value": null}, {"op": "add", "path": "/spec/plugins", "value": ["mcp-gateway-console-plugin"]}]' \
+	  2>/dev/null || \
+	kubectl patch console.operator.openshift.io cluster \
+	  --type='json' \
+	  -p='[{"op": "add", "path": "/spec/plugins/-", "value": "mcp-gateway-console-plugin"}]'
+	@echo "Console plugin enabled. Wait for console pods to restart and then refresh your browser."
+
+.PHONY: disable-console-plugin
+disable-console-plugin: ## Disable the MCP Gateway Console Plugin in OpenShift Console
+	@echo "Disabling mcp-gateway-console-plugin in OpenShift Console..."
+	@kubectl patch console.operator.openshift.io cluster \
+	  --type='json' \
+	  -p='[{"op": "remove", "path": "/spec/plugins", "value": ["mcp-gateway-console-plugin"]}]' \
+	  2>/dev/null || echo "Plugin was not enabled"
+
+.PHONY: undeploy-console-plugin
+undeploy-console-plugin: disable-console-plugin ## Remove console plugin deployment
+	kubectl delete -k config/mcp-gateway/components/console-plugin/ || true

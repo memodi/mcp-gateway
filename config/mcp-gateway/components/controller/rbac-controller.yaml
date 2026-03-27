@@ -13,6 +13,18 @@ rules:
   - apiGroups:
       - ""
     resources:
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
       - namespaces
     verbs:
       - get
@@ -38,6 +50,18 @@ rules:
       - delete
       - get
       - list
+      - update
+      - watch
+  - apiGroups:
+      - console.openshift.io
+    resources:
+      - consoleplugins
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
       - update
       - watch
   - apiGroups:

@@ -26,6 +26,7 @@ import (
 	"github.com/go-logr/logr"
 
 	goenv "github.com/caitlinelfring/go-env-default"
+	consolev1 "github.com/openshift/api/console/v1"
 	istionetv1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -49,6 +50,7 @@ func init() {
 	runtime.Must(gatewayv1.Install(scheme.Scheme))
 	runtime.Must(gatewayv1beta1.Install(scheme.Scheme))
 	runtime.Must(istionetv1alpha3.AddToScheme(scheme.Scheme))
+	runtime.Must(consolev1.Install(scheme.Scheme))
 }
 
 func main() {
@@ -122,6 +124,7 @@ func main() {
 	}
 
 	brokerRouterImage := goenv.GetDefault("RELATED_IMAGE_ROUTER_BROKER", controller.DefaultBrokerRouterImage)
+	consolePluginImage := goenv.GetDefault("RELATED_IMAGE_CONSOLE_PLUGIN", controller.DefaultConsolePluginImage)
 
 	if err = (&controller.MCPGatewayExtensionReconciler{
 		Client:                mgr.GetClient(),
@@ -130,6 +133,7 @@ func main() {
 		ConfigWriterDeleter:   &configReaderWriter,
 		MCPExtFinderValidator: mcpExtFinderValidator,
 		BrokerRouterImage:     brokerRouterImage,
+		ConsolePluginImage:    consolePluginImage,
 	}).SetupWithManager(ctx, mgr); err != nil {
 		panic("unable to start manager : " + err.Error())
 	}

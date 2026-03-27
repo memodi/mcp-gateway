@@ -119,4 +119,7 @@ spec:
   provider:
     name: Kuadrant
     url: https://kuadrant.io
+  relatedImages:
+    - image: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:latest
+      name: console-plugin
   version: 0.0.0
