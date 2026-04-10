@@ -3,21 +3,44 @@
 
 # Image configuration for mcp-gateway broker-router (deployed by controller)
 image:
-  repository: ghcr.io/kuadrant/mcp-gateway
+  repository: quay.io/rhn_support_memodi/mcp-gateway
   # tag defaults to Chart.appVersion if empty
-  tag: ""
+  tag: latest
 
 # Image configuration for mcp-controller
 imageController:
-  repository: ghcr.io/kuadrant/mcp-controller
+  repository: quay.io/rhn_support_memodi/mcp-gateway
   # tag defaults to Chart.appVersion if empty
-  tag: ""
-  pullPolicy: IfNotPresent
+  tag: latest
+  pullPolicy: Always
 
 # Controller configuration
 controller:
   # Enable/disable controller deployment
   enabled: true
+
+# Console Plugin configuration
+consolePlugin:
+  # Enable/disable OpenShift Console Plugin deployment
+  enabled: true
+  # Image configuration
+  image:
+    repository: quay.io/rhn_support_memodi/mcp-gateway-console-plugin
+    tag: d0bbf9e-20260406-162459
+    pullPolicy: Always
+  # Number of replicas
+  replicas: 1
+  # Resource limits
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  # Service configuration
+  service:
+    port: 9443
 
 # Broker configuration (applied to broker-router deployed by controller)
 broker:

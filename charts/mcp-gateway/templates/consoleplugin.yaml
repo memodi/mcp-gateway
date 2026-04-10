@@ -18,4 +18,13 @@ spec:
       namespace: {{ .Release.Namespace }}
       port: {{ .Values.consolePlugin.service.port }}
       basePath: /
+  proxy:
+    - alias: broker
+      authorization: UserToken
+      endpoint:
+        type: Service
+        service:
+          name: {{ include "mcp-gateway.fullname" . }}-console-plugin
+          namespace: {{ .Release.Namespace }}
+          port: {{ .Values.consolePlugin.service.port }}
 {{- end }}

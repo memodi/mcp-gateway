@@ -19,3 +19,12 @@ spec:
       namespace: mcp-system
       port: 9443
       basePath: /
+  proxy:
+    - alias: broker
+      authorization: UserToken
+      endpoint:
+        type: Service
+        service:
+          name: mcp-gateway-console-plugin
+          namespace: mcp-system
+          port: 9443
