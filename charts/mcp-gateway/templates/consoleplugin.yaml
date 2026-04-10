@@ -1,0 +1,21 @@
+{{- if .Values.consolePlugin.enabled }}
+---
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  name: {{ include "mcp-gateway.fullname" . }}-console-plugin
+  labels:
+    {{- include "mcp-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: console-plugin
+spec:
+  displayName: MCP Gateway Plugin
+  i18n:
+    loadType: Preload
+  backend:
+    type: Service
+    service:
+      name: {{ include "mcp-gateway.fullname" . }}-console-plugin
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.consolePlugin.service.port }}
+      basePath: /
+{{- end }}

@@ -1,0 +1,23 @@
+{{- if .Values.consolePlugin.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mcp-gateway.fullname" . }}-console-plugin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mcp-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: console-plugin
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: {{ include "mcp-gateway.fullname" . }}-console-plugin-cert
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: {{ .Values.consolePlugin.service.port }}
+      targetPort: {{ .Values.consolePlugin.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "mcp-gateway.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: console-plugin
+{{- end }}

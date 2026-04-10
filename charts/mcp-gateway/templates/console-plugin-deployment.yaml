@@ -1,0 +1,74 @@
+{{- if .Values.consolePlugin.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mcp-gateway.fullname" . }}-console-plugin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "mcp-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: console-plugin
+spec:
+  replicas: {{ .Values.consolePlugin.replicas }}
+  selector:
+    matchLabels:
+      {{- include "mcp-gateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: console-plugin
+  template:
+    metadata:
+      labels:
+        {{- include "mcp-gateway.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: console-plugin
+    spec:
+      serviceAccountName: {{ include "mcp-gateway.fullname" . }}-console-plugin
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: console-plugin
+          image: "{{ .Values.consolePlugin.image.repository }}:{{ .Values.consolePlugin.image.tag }}"
+          imagePullPolicy: {{ .Values.consolePlugin.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.consolePlugin.service.port }}
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- toYaml .Values.consolePlugin.resources | nindent 12 }}
+          volumeMounts:
+            - name: plugin-serving-cert
+              mountPath: /var/serving-cert
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.consolePlugin.service.port }}
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.consolePlugin.service.port }}
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: plugin-serving-cert
+          secret:
+            secretName: {{ include "mcp-gateway.fullname" . }}-console-plugin-cert
+            defaultMode: 420
+        - name: nginx-conf
+          configMap:
+            name: {{ include "mcp-gateway.fullname" . }}-console-plugin-nginx
+            defaultMode: 420
+{{- end }}

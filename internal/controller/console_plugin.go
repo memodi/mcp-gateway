@@ -22,7 +22,7 @@ const (
 	// console plugin constants
 	consolePluginName         = "mcp-gateway-console-plugin"
 	consolePluginPort         = 9443
-	consolePluginReplicas     = 2
+	consolePluginReplicas     = 1
 	DefaultConsolePluginImage = "ghcr.io/kuadrant/mcp-gateway-console-plugin:latest"
 )
 

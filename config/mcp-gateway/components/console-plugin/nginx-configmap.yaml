@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-gateway-console-plugin-nginx
+  namespace: mcp-system
+  labels:
+    app: mcp-gateway-console-plugin
+    app.kubernetes.io/name: mcp-gateway-console-plugin
+    app.kubernetes.io/component: console-plugin
+    app.kubernetes.io/part-of: mcp-gateway
+data:
+  nginx.conf: |
+    error_log /dev/stdout info;
+    events {}
+    http {
+      access_log /dev/stdout;
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+      server {
+        listen 9443 ssl;
+        ssl_certificate /var/serving-cert/tls.crt;
+        ssl_certificate_key /var/serving-cert/tls.key;
+        root /usr/share/nginx/html;
+
+        # proxy status to broker service (for server list)
+        location /status {
+          proxy_pass http://mcp-gateway.mcp-system.svc.cluster.local:8080/status;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # proxy MCP requests to Gateway service (goes through ext_proc for session management)
+        # NOTE: This is a placeholder. In production, the controller generates this dynamically
+        # based on the actual Gateway service name and listener configuration.
+        location /mcp {
+          proxy_pass http://mcp-gateway-istio.gateway-system.svc.cluster.local:8080/mcp;
+          proxy_set_header Host mcp.apps.example.com;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffering off;
+          proxy_cache off;
+        }
+
+        location / {
+          try_files $uri $uri/ /index.html;
+        }
+        location /plugin-manifest.json {
+          default_type application/json;
+        }
+      }
+    }

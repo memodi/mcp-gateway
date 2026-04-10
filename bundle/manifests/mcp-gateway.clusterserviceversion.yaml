@@ -5,8 +5,8 @@ metadata:
     alm-examples: "[\n  {\n    \"apiVersion\": \"mcp.kuadrant.io/v1alpha1\",\n    \"kind\": \"MCPGatewayExtension\",\n    \"metadata\": {\n      \"name\": \"mcp-gateway-extension\",\n      \"namespace\": \"mcp-system\"\n    },\n    \"spec\": {\n      \"targetRef\": {\n        \"group\": \"gateway.networking.k8s.io\",\n        \"kind\": \"Gateway\",\n        \"name\": \"mcp-gateway\",\n        \"namespace\": \"gateway-system\",\n        \"sectionName\": \"mcp\"\n      }\n    }\n  },\n  {\n    \"apiVersion\": \"mcp.kuadrant.io/v1alpha1\",\n    \"kind\": \"MCPServerRegistration\",\n    \"metadata\": {\n      \"name\": \"example-server\",\n      \"namespace\": \"mcp-test\"\n    },\n    \"spec\": {\n      \"toolPrefix\": \"example_\",\n      \"targetRef\": {\n        \"group\": \"gateway.networking.k8s.io\",\n        \"kind\": \"HTTPRoute\",\n        \"name\": \"example-route\"\n      }\n    }\n  },\n  {\n    \"apiVersion\": \"mcp.kuadrant.io/v1alpha1\",\n    \"kind\": \"MCPVirtualServer\",\n    \"metadata\": {\n      \"name\": \"example-vs\",\n      \"namespace\": \"default\"\n    },\n    \"spec\": {\n      \"description\": \"example virtual server\",\n      \"tools\": [\n        \"server1_tool1\",\n        \"server2_tool2\"\n      ]\n    }\n  }\n]"
     capabilities: Basic Install
     categories: Integration & Delivery
-    containerImage: quay.io/rhn_support_memodi/mcp-controller:dc6cc7c-20260326-132316
-    createdAt: "2026-03-26T17:35:51Z"
+    containerImage: quay.io/rhn_support_memodi/mcp-controller:2165251-20260403-160133
+    createdAt: "2026-04-06T20:39:20Z"
     description: An Envoy-based gateway for Model Context Protocol (MCP) servers
     operators.operatorframework.io/builder: operator-sdk-v1.38.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
@@ -207,8 +207,8 @@ spec:
                       - name: RELATED_IMAGE_ROUTER_BROKER
                         value: quay.io/rhn_support_memodi/mcp-gateway:dc6cc7c-20260326-132316
                       - name: RELATED_IMAGE_CONSOLE_PLUGIN
-                        value: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:faff3d1-20260326-142956
-                    image: quay.io/rhn_support_memodi/mcp-controller:dc6cc7c-20260326-132316
+                        value: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:d0bbf9e-20260406-162459
+                    image: quay.io/rhn_support_memodi/mcp-controller:2165251-20260403-160133
                     imagePullPolicy: Always
                     livenessProbe:
                       httpGet:
@@ -270,6 +270,6 @@ spec:
   relatedImages:
     - image: quay.io/rhn_support_memodi/mcp-gateway:dc6cc7c-20260326-132316
       name: router-broker
-    - image: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:faff3d1-20260326-142956
+    - image: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:d0bbf9e-20260406-162459
       name: console-plugin
   version: 0.0.0

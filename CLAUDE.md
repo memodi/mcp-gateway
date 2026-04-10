@@ -333,3 +333,6 @@ Test servers in `config/test-servers/`:
 - Files must end with newline
 - Regularly run make lint to check for lint errors.
 - When adding or changing CRD fields in `api/v1alpha1/`, update the corresponding API reference doc in `docs/reference/` to reflect the change.
+
+## Integration with console plugin
+@/Users/memodi/workspaces/repos/mcp-gateway-console-plugin/Claude.md

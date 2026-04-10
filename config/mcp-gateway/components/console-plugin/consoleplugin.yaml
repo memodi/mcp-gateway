@@ -1,0 +1,21 @@
+---
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  name: mcp-gateway-console-plugin
+  labels:
+    app: mcp-gateway-console-plugin
+    app.kubernetes.io/name: mcp-gateway-console-plugin
+    app.kubernetes.io/component: console-plugin
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  displayName: MCP Gateway Plugin
+  i18n:
+    loadType: Preload
+  backend:
+    type: Service
+    service:
+      name: mcp-gateway-console-plugin
+      namespace: mcp-system
+      port: 9443
+      basePath: /

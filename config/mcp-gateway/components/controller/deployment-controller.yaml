@@ -20,14 +20,16 @@ spec:
       serviceAccountName: mcp-controller
       containers:
         - name: mcp-controller
-          image: ghcr.io/kuadrant/mcp-controller:latest
-          imagePullPolicy: IfNotPresent
+          image: quay.io/rhn_support_memodi/mcp-controller:2165251-20260403-160133
+          imagePullPolicy: Always
           command:
             - ./mcp_controller
             - --log-level=0 # info level
           env:
             - name: RELATED_IMAGE_ROUTER_BROKER
-              value: ghcr.io/kuadrant/mcp-gateway:latest
+              value: quay.io/rhn_support_memodi/mcp-gateway:dc6cc7c-20260326-132316
+            - name: RELATED_IMAGE_CONSOLE_PLUGIN
+              value: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:d0bbf9e-20260406-162459
           ports:
             - name: health
               containerPort: 8081

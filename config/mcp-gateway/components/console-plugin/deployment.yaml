@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-gateway-console-plugin
+  namespace: mcp-system
+  labels:
+    app: mcp-gateway-console-plugin
+    app.kubernetes.io/name: mcp-gateway-console-plugin
+    app.kubernetes.io/component: console-plugin
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-gateway-console-plugin
+  template:
+    metadata:
+      labels:
+        app: mcp-gateway-console-plugin
+        app.kubernetes.io/name: mcp-gateway-console-plugin
+        app.kubernetes.io/component: console-plugin
+    spec:
+      serviceAccountName: mcp-gateway-console-plugin
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcp-gateway-console-plugin
+          image: quay.io/rhn_support_memodi/mcp-gateway-console-plugin:d0bbf9e-20260406-162459
+          imagePullPolicy: Always
+          ports:
+            - name: https
+              containerPort: 9443
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: plugin-serving-cert
+              mountPath: /var/serving-cert
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: plugin-serving-cert
+          secret:
+            secretName: mcp-gateway-console-plugin-cert
+            defaultMode: 420
+        - name: nginx-conf
+          configMap:
+            name: mcp-gateway-console-plugin-nginx
+            defaultMode: 420
